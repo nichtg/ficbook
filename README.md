@@ -21,7 +21,7 @@ Ficbook is a web application that helps users track updates on their favourite [
 ## Built With
 
 * [![Supabase][Supabase]][Supabase-url]
-* [![Django][Django]][Django-url]
+* [![Flask][Flask]][Flask-url]
 * [![Python][Python]][Python-url]
 
 
@@ -51,7 +51,7 @@ Nicholas - nichtng@gmail.com
 [product-screenshot]: images/screenshot.png
 [Supabase]: https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=fff
 [Supabase-url]: https://supabase.com/
-[Django]: https://img.shields.io/badge/Django-%23092E20.svg?logo=django&logoColor=white
-[Django-url]: https://www.djangoproject.com/
+[Flask]: https://img.shields.io/badge/Flask-000?logo=flask&logoColor=fff
+[Flask-url]: https://flask.palletsprojects.com/en/stable/
 [Python]: https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff
 [Python-url]: https://python.org/
