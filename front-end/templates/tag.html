@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ficbook - Tracked Tags</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1"
+      type="module"
+    ></script>
+  </head>
+  <body class="bg-gray-50">
+    <nav
+      class="bg-gradient-to-r from-red-700 to-red-800 text-white sticky top-0 z-50"
+    >
+      <div
+        class="max-w-7xl px-4 py-4 flex justify-normal items-center"
+      >
+        <button
+          id="sidebarToggle"
+          type="button"
+          aria-controls="sidebar"
+          aria-expanded="true"
+          class="me-4 border-2 border-transparent hover:border-white p-2 rounded-lg transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+            />
+          </svg>
+        </button>
+        <a href="/" class="text-2xl font-bold hover:text-red-200 transition"
+          >📖 Ficbook</a
+        >
+      </div>
+    </nav>
+
+    <!-- Toast -->
+    {% if message %}
+    <div
+      id="toast"
+      class="fixed top-4 right-4 z-[60] max-w-sm rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-green-50 p-4 shadow-xl shadow-emerald-100/70 transition-all duration-500"
+    >
+      <div class="flex items-start gap-3">
+        <div
+          class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            class="size-5"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-6.5 7.5a.75.75 0 0 1-1.086.04l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.928 2.928 5.968-6.89a.75.75 0 0 1 1.052-.143Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold text-emerald-900">Success</p>
+          <p class="text-sm leading-5 text-gray-700">{{ message }}</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="flex min-h-screen">
+      <aside
+        id="sidebar"
+        class="w-full md:w-64 bg-white border-r border-gray-200 p-4 transition-[width,margin,padding] duration-500 overflow-hidden"
+      >
+        <nav id="sidebarNav" class="space-y-2">
+          <a
+            href="/dashboard"
+            class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+          >
+            📊 Dashboard
+          </a>
+          <a
+            href="/favourites"
+            class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+          >
+            📚 My Favourites
+          </a>
+          <a
+            href="/tags"
+            class="block px-4 py-3 rounded-lg bg-red-50 text-red-700 border-l-4 border-red-700 font-semibold hover:bg-red-100 transition"
+          >
+            🏷️ Tracked Tags
+          </a>
+          <hr class="my-3" />
+          <a
+            href="/user"
+            class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                class="size-5 fill-slate-950"
+              >
+                <path
+                  d="M10 3.75a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM17.25 4.5a.75.75 0 0 0 0-1.5h-5.5a.75.75 0 0 0 0 1.5h5.5ZM5 3.75a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 .75.75ZM4.25 17a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5ZM17.25 17a.75.75 0 0 0 0-1.5h-5.5a.75.75 0 0 0 0 1.5h5.5ZM9 10a.75.75 0 0 1-.75.75h-5.5a.75.75 0 0 1 0-1.5h5.5A.75.75 0 0 1 9 10ZM17.25 10.75a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5ZM14 10a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM10 16.25a2 2 0 1 0-4 0 2 2 0 0 0 4 0Z"
+                />
+              </svg>
+
+              Settings
+            </div>
+          </a>
+          <a
+            href="/logout"
+            class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                class="size-5 fill-slate-950"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M17 4.25A2.25 2.25 0 0 0 14.75 2h-5.5A2.25 2.25 0 0 0 7 4.25v2a.75.75 0 0 0 1.5 0v-2a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 .75.75v11.5a.75.75 0 0 1-.75.75h-5.5a.75.75 0 0 1-.75-.75v-2a.75.75 0 0 0-1.5 0v2A2.25 2.25 0 0 0 9.25 18h5.5A2.25 2.25 0 0 0 17 15.75V4.25Z"
+                  clip-rule="evenodd"
+                />
+                <path
+                  fill-rule="evenodd"
+                  d="M14 10a.75.75 0 0 0-.75-.75H3.704l1.048-.943a.75.75 0 1 0-1.004-1.114l-2.5 2.25a.75.75 0 0 0 0 1.114l2.5 2.25a.75.75 0 1 0 1.004-1.114l-1.048-.943h9.546A.75.75 0 0 0 14 10Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Logout
+            </div>
+          </a>
+        </nav>
+      </aside>
+
+      <main class="flex-1 p-4 md:p-8">
+        <div
+          class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8"
+        >
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
+              Tracked Tags
+            </h1>
+            <p class="text-gray-600 mt-1">
+              All tags you are currently tracking in Ficbook.
+            </p>
+          </div>
+        </div>
+
+        <section class="grid gap-6">
+          {% if tags %}
+          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {% for tag in tags %}
+            <article
+              class="relative rounded-3xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-lg transition"
+              data-rss-feed="{{ tag.rss_feed }}"
+            >
+              <div class="flex items-center justify-between gap-4 mb-4">
+                {% if tag.status == 'PENDING' %}
+                <div
+                  class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700"
+                >
+                  Fetching Tag Info...
+                </div>
+                {% else %}
+                <div>
+                  <p
+                    class="text-sm uppercase tracking-[0.25em] text-red-700 font-semibold"
+                  >
+                    Tag
+                  </p>
+                  <h2 class="mt-2 text-2xl font-bold text-gray-900 tag-name">
+                    {{ tag.tag_name }}
+                  </h2>
+                </div>
+                {% endif %}
+              </div>
+              <div class="flex items-center gap-2">
+                <p class="text-gray-600">RSS Feed:</p>
+                <a
+                  href="{{ tag.rss_feed }}"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="text-red-700 hover:underline break-all"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    class="size-5"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5Z"
+                      clip-rule="evenodd"
+                    />
+                    <path
+                      fill-rule="evenodd"
+                      d="M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.056 8.194a.75.75 0 0 0-.053 1.06Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="/delete-tag?rss_feed={{ tag.rss_feed }}"
+                  rel="noreferrer"
+                  class="absolute bottom-4 right-4 flex justify-end rounded-lg bg-red-100 p-2 transition hover:bg-red-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    class="size-5 fill-red-700 hover:fill-red-800 transition"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div
+            class="rounded-3xl border border-dashed border-gray-300 bg-white p-10 text-center shadow-sm"
+          >
+            <p class="text-gray-700 text-lg font-semibold">
+              No tags tracked yet.
+            </p>
+            <p class="mt-3 text-gray-500">
+              Add a new tag from your dashboard to start tracking your favourite
+              AO3 tag feeds.
+            </p>
+            <a
+              href="/dashboard"
+              class="mt-6 inline-flex items-center justify-center rounded-lg bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800"
+            >
+              Go add your first tag
+            </a>
+          </div>
+          {% endif %}
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      const sidebar = document.getElementById("sidebar");
+      const sidebarNav = document.getElementById("sidebarNav");
+
+      if (sidebarToggle && sidebar && sidebarNav) {
+        sidebarToggle.addEventListener("click", () => {
+          const isCollapsed =
+            sidebarToggle.getAttribute("aria-expanded") === "false";
+
+          if (isCollapsed) {
+            sidebar.classList.remove("w-0", "md:w-0", "p-0");
+            sidebar.classList.add("w-full", "md:w-64", "p-4");
+            sidebarNav.classList.remove("hidden");
+            sidebarToggle.setAttribute("aria-expanded", "true");
+          } else {
+            sidebar.classList.remove("w-full", "md:w-64", "p-4");
+            sidebar.classList.add("w-0", "md:w-0", "p-0");
+            sidebarNav.classList.add("hidden");
+            sidebarToggle.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+      const supabase = createClient(
+        "https://evhirnkacmpxdrnnevum.supabase.co",
+        "sb_publishable_nOGbeykwEu-qN2ZqhMr8WQ_d2fI9rgT",
+      );
+
+      supabase
+        .channel("tags-changes")
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "Tags" },
+          (payload) => {
+            const tag = payload.new;
+            if (tag.status !== "READY") return;
+
+            const card = document.querySelector(
+              `[data-rss-feed="${CSS.escape(tag.rss_feed)}"]`,
+            );
+            if (!card) return;
+
+            const badgeWrapper = card.querySelector(
+              ".flex.items-center.justify-between",
+            );
+            badgeWrapper.innerHTML = `
+              <div>
+                <p class="text-sm uppercase tracking-[0.25em] text-red-700 font-semibold">Tag</p>
+                <h2 class="mt-2 text-2xl font-bold text-gray-900 tag-name">${tag.tag_name}</h2>
+              </div>
+            `;
+          },
+        )
+        .subscribe();
+
+      const toast = document.getElementById("toast");
+      if (toast) {
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "translate-y-2", "brightness-110");
+          setTimeout(() => toast.remove(), 500);
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>
