@@ -303,11 +303,38 @@ def delete_fav():
 
 @app.route('/user')
 def user():
-    return render_template('user.html')
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    user_result = supabase.table("Users").select('*').eq('id', user_id).execute()
+    user_email = user_result.data[0]['email'] if user_result.data else ''
+    user_pw_hash = user_result.data[0]['password'] if user_result.data else ''
+
+    message = request.args.get('message')
+
+    return render_template('user.html', user_email=user_email, user_pw=user_pw_hash, message=message)
+
+@app.route('/update-user', methods=["POST"])
+def update_user():
+    user_id = session.get('user_id')
+    email = request.form.get('email')
+
+    supabase.table('Users').update({
+            'email': email,
+        }).eq('id', user_id).execute()
+
+    return redirect(url_for('user', message="Email changed."))
+
+@app.route('/update-pw', methods=["POST"])
+def update_pw():
+    user_id = session.get('user_id')
+    current_pw = request.form.get('current_pw')
+    new_pw = request.form.get('new_pw')
 
 @app.route('/admin')
 def admin():
     return render_template('admin.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, port=5000)
