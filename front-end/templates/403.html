@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ficbook - Access Denied</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-gray-50 text-gray-900">
+    <nav class="bg-gradient-to-r from-red-700 to-red-800 text-white">
+      <div class="px-4 py-4">
+        <a href="/" class="text-2xl font-bold transition hover:text-red-200">📖 Ficbook</a>
+      </div>
+    </nav>
+
+    <main class="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12">
+      <section class="w-full max-w-lg rounded-2xl border border-red-100 bg-white p-8 text-center shadow-xl shadow-red-100/60 sm:p-12" aria-labelledby="error-title">
+        <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50 text-4xl font-bold text-red-700" aria-hidden="true">
+          403
+        </div>
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-red-700">Access denied</p>
+        <h1 id="error-title" class="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">This page is off limits.</h1>
+        <p class="mx-auto max-w-md text-base leading-7 text-gray-600">
+          You do not have permission to access this page.
+        </p>
+
+        <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          {% if logged_in %}
+          <a href="/dashboard" class="rounded-lg bg-red-700 px-5 py-3 font-semibold text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2">
+            Return to dashboard
+          </a>
+          {% else %}
+          <a href="/login" class="rounded-lg bg-red-700 px-5 py-3 font-semibold text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2">
+            Go to login
+          </a>
+          {% endif %}
+          <a href="/" class="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+            Back to Ficbook
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

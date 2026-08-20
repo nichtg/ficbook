@@ -100,6 +100,14 @@
           >
             🏷️ Tracked Tags
           </a>
+          {% if is_admin %}
+          <a
+            href="/admin"
+            class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+          >
+            🛡️ Admin Panel
+          </a>
+          {% endif %}
           <hr class="my-3" />
           <a
             href="/user"

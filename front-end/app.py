@@ -14,13 +14,28 @@ url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key) # Initialize Supabase client
 
-### Job that fetches new updates from all tags daily at 12:00 AM
-def tag_refresh_job():
-    rss_feeds = supabase.table('Tags').select('rss_feed').execute()
-    for url in rss_feeds.data:
-        print(f"Fetching updates for RSS feed: {url['rss_feed']}")
+def current_user_is_admin():
+    user_id = session.get('user_id')
+    if not user_id:
+        return False
+
+    user_result = supabase.table('Users').select('admin').eq('id', user_id).execute()
+    return bool(user_result.data and user_result.data[0].get('admin'))
+
+@app.context_processor
+def inject_admin_status():
+    return {'is_admin': current_user_is_admin()}
+
+# Job that fetches new updates from all tags daily at 12:00 AM
+def tag_refresh_job(rss_feeds=None):
+    if rss_feeds is None:
+        tag_result = supabase.table('Tags').select('rss_feed').execute()
+        rss_feeds = [item['rss_feed'] for item in (tag_result.data or [])]
+
+    for rss_feed in rss_feeds:
+        print(f"Fetching updates for RSS feed: {rss_feed}")
         try:
-            data = requests.get(url['rss_feed']).text  # Fetch the RSS feed to trigger any updates
+            data = requests.get(rss_feed).text  # Fetch the RSS feed to trigger any updates
             soup = BeautifulSoup(data, "xml")
             
             for entry in soup.find_all("entry", limit=5):
@@ -38,25 +53,22 @@ def tag_refresh_job():
                     'author_name': author,
                     'source': source,
                     'updated_at': updated,
-                    'rss_feed': url['rss_feed'],
+                    'rss_feed': rss_feed,
                 }, on_conflict='id').execute()
                 
-                print(f"Updated work ID: {work_id} for RSS feed: {url['rss_feed']}")
+                print(f"Updated work ID: {work_id} for RSS feed: {rss_feed}")
             
             time.sleep(30)  # Sleep for 30 seconds to avoid overwhelming the server with requests
         
         except Exception as e:
-            print(f"Error fetching RSS feed from {url['rss_feed']}: {e}")
+            print(f"Error fetching RSS feed from {rss_feed}: {e}")
             
-def job_scheduler():
-     # Schedule the tag refresh job to run daily at 12:00 AM
-    schedule.every().day.at("00:00").do(tag_refresh_job)
-    while True:
-        schedule.run_pending()
-        time.sleep(60)
-        
-scheduler_thread = threading.Thread(target=job_scheduler, daemon=True)
-scheduler_thread.start()
+# def job_scheduler():
+#      # Schedule the tag refresh job to run daily at 12:00 AM
+#     schedule.every().day.at("00:00").do(tag_refresh_job)
+#     while True:
+#         schedule.run_pending()
+#         time.sleep(60)
 
 @app.route('/')
 def index():
@@ -67,7 +79,10 @@ def index():
 
 @app.route('/login')
 def login():
-    return render_template('login.html')
+    message = request.args.get('message')
+    status = request.args.get('status', default=200, type=int)
+    
+    return render_template('login.html', message=message, status=status)
 
 # Handle login form submission
 @app.route('/login-form', methods=['POST'])
@@ -78,10 +93,9 @@ def login_form():
     # Retrieve user data from DB
     user = supabase.table('Users').select('*').eq('email', email).execute()
     if user.data:
-        pw_hash = pbkdf2_sha256.hash(password)
         if pbkdf2_sha256.verify(password, user.data[0]['password']):
             session['user_id'] = user.data[0]['id']  # Store user ID in session
-            return render_template('dashboard.html', message="Login successful!", status=200)
+            return redirect(url_for('dashboard', message="Login successful!", status=200))
         else:
             return render_template('login.html', message="Incorrect password. Please try again.", status=401)
     else:
@@ -174,7 +188,11 @@ def dashboard():
     # Get the newest story for each tag
     newest_stories = []
     if rss_feeds:
-        works_result = supabase.table('Works').select('*').in_('rss_feed', rss_feeds).order('updated_at', desc=True).execute()
+        works_result = (supabase.table('Works').select('*')
+                .in_('rss_feed', rss_feeds)
+                .order('updated_at', desc=True)
+                .order('id', desc=True)
+                .execute())
         works = works_result.data or []
 
         # Ensure that we only keep the newest story for each unique RSS feed
@@ -237,7 +255,7 @@ def add_tag():
         daemon=True,
     ).start()
 
-    return render_template('dashboard.html', message=f"Tag is being added.", status=202)
+    return redirect(url_for('dashboard', message="Tag is being added.", status=202))
 
 @app.route('/delete-tag')
 def delete_tag():
@@ -250,8 +268,15 @@ def delete_tag():
 
 @app.route('/refresh-tags')
 def refresh_tags():
-        
-    return redirect(url_for('dashboard', message="Fetching updates...", status=202))
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    user_tags_result = supabase.table('User_Tags').select('rss_feed').eq('user_id', user_id).execute()
+    rss_feeds = [item['rss_feed'] for item in (user_tags_result.data or [])]
+    tag_refresh_job(rss_feeds)
+
+    return redirect(url_for('dashboard', message="Fetching updates...", status=200))
 
 
 @app.route('/favourites')
@@ -292,9 +317,9 @@ def delete_fav():
     work_id = request.args.get('work_id')
     supabase.table('User_Works').delete().eq('user_id', session.get('user_id')).eq('work_id', work_id).execute()
     
-    print(f"Deleted story {work_id}")
+    print(f"Deleted story {work_id} from favourites.")
     
-    return redirect(url_for('favourites', message=f"Story has been deleted.", status=200))
+    return redirect(url_for('favourites', message="Story has been removed from favourites.", status=200))
     
     
 
@@ -309,11 +334,11 @@ def user():
 
     user_result = supabase.table("Users").select('*').eq('id', user_id).execute()
     user_email = user_result.data[0]['email'] if user_result.data else ''
-    user_pw_hash = user_result.data[0]['password'] if user_result.data else ''
 
     message = request.args.get('message')
+    status = request.args.get('status', default=200, type=int)
 
-    return render_template('user.html', user_email=user_email, user_pw=user_pw_hash, message=message)
+    return render_template('user.html', user_email=user_email, message=message, status=status)
 
 @app.route('/update-user', methods=["POST"])
 def update_user():
@@ -324,17 +349,87 @@ def update_user():
             'email': email,
         }).eq('id', user_id).execute()
 
-    return redirect(url_for('user', message="Email changed."))
+    return redirect(url_for('user', message="Email changed.", status=200))
 
 @app.route('/update-pw', methods=["POST"])
 def update_pw():
     user_id = session.get('user_id')
     current_pw = request.form.get('current_pw')
-    new_pw = request.form.get('new_pw')
+    new_pw = request.form.get('new_pw') 
+    
+    user_result = supabase.table('Users').select('password').eq('id', user_id).execute()
+    
+    if pbkdf2_sha256.verify(current_pw, user_result.data[0]['password']):
+        supabase.table('Users').update({
+            'password': pbkdf2_sha256.hash(new_pw)
+        }).eq('id', user_id).execute()
+        return redirect(url_for('user', message="Password changed.", status=200))
+    else:
+        return redirect(url_for('user', message="Current password is incorrect. Please try again.", status=400))
+    
+@app.route('/delete-user')
+def delete_user():
+    user_id = session.get('user_id')
+    
+    supabase.table('User_Tags').delete().eq('user_id', user_id).execute()
+    print(f"Deleted all tags for user {user_id}.")
+    
+    supabase.table('User_Works').delete().eq('user_id', user_id).execute()
+    print(f"Deleted all works for user {user_id}.")
+    
+    supabase.table('Users').delete().eq('id', user_id).execute()
+    print(f"Deleted user {user_id}. Redirecting to login page")
+    
+    session.pop('user_id', None) 
+        
+    return redirect(url_for('login', message="Account deleted.", status=200))
+    
 
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    user_id = session.get('user_id')
+    if not user_id:
+        return render_template('403.html', logged_in=False), 403
+
+    if current_user_is_admin():
+        users = supabase.table('Users').select('id, email, admin').order('id').execute()
+        message = request.args.get('message')
+        status = request.args.get('status', default=200, type=int)
+        
+        return render_template('admin.html', users=users.data or [], message=message, status=status,)
+
+    return render_template('403.html', logged_in=True), 403
+
+@app.route('/admin/update-user', methods=['POST'])
+def admin_update_user():
+    if not current_user_is_admin():
+        return render_template('403.html', logged_in=bool(session.get('user_id'))), 403
+
+    user_id = request.form.get('user_id')
+    email = request.form.get('email', '').strip()
+    is_admin = request.form.get('admin') == 'on'
+    if not user_id or not email:
+        return redirect(url_for('admin', message='Email is required.', status=400))
+
+    supabase.table('Users').update({'email': email, 'admin': is_admin}).eq('id', user_id).execute()
+    return redirect(url_for('admin', message='User updated.', status=200))
+
+@app.route('/admin/delete-user', methods=['POST'])
+def admin_delete_user():
+    if not current_user_is_admin():
+        return render_template('403.html', logged_in=bool(session.get('user_id'))), 403
+
+    user_id = request.form.get('user_id')
+    if not user_id or str(user_id) == str(session.get('user_id')):
+        return redirect(url_for('admin', message='You cannot delete your own account here.', status=400))
+
+    supabase.table('User_Tags').delete().eq('user_id', user_id).execute()
+    supabase.table('User_Works').delete().eq('user_id', user_id).execute()
+    supabase.table('Users').delete().eq('id', user_id).execute()
+    
+    return redirect(url_for('admin', message='User deleted.', status=200))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # scheduler_thread = threading.Thread(target=job_scheduler, daemon=True)
+    # scheduler_thread.start()
+    app.run(debug=True, port=1234)

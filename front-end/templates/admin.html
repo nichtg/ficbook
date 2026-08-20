@@ -1,343 +1,325 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Ficbook - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
   <body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-gradient-to-r from-red-700 to-red-800 text-white sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold hover:text-red-200 transition">📖 Ficbook</a>
-        <div class="flex items-center gap-4">
-          <span class="hidden sm:inline text-red-100">Admin Panel</span>
-          <a href="/user" class="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition">
-            👤 Profile
-          </a>
-          <a href="/" class="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition">
-            🚪 Logout
-          </a>
-        </div>
+    <nav
+      class="sticky top-0 z-50 bg-gradient-to-r from-red-700 to-red-800 text-white"
+    >
+      <div class="flex max-w-7xl items-center justify-normal px-4 py-4">
+        <button
+          id="sidebarToggle"
+          type="button"
+          aria-controls="sidebar"
+          aria-expanded="true"
+          class="me-4 rounded-lg border-2 border-transparent p-2 transition hover:border-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+            />
+          </svg>
+        </button>
+        <a href="/" class="text-2xl font-bold transition hover:text-red-200"
+          >📖 Ficbook</a
+        >
       </div>
     </nav>
 
-    <!-- Main Container -->
+    {% if message and status == 200 %}
+    <div
+      id="toast"
+      class="fixed top-4 right-4 z-[60] max-w-sm rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-green-50 p-4 shadow-xl shadow-emerald-100/70 transition-all duration-500"
+    >
+      <div class="flex items-start gap-3">
+        <div
+          class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            class="size-5"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M16.704 4.153a.75.75 0 1 1 .143 1.052l-6.5 7.5a.75.75 0 0 1-1.086.04l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.928 2.928 5.968-6.89a.75.75 0 0 1 1.052-.143Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold text-emerald-900">Success</p>
+          <p class="text-sm leading-5 text-gray-700">{{ message }}</p>
+        </div>
+      </div>
+    </div>
+    {% elif message and status == 400 %}
+    <div
+      id="toast"
+      class="fixed top-4 right-4 z-[60] max-w-sm rounded-2xl border border-red-200 bg-gradient-to-br from-red-50 via-white to-red-50 p-4 shadow-xl shadow-red-100/70 transition-all duration-500"
+    >
+      <div class="flex items-start gap-3">
+        <div
+          class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-600 text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            class="size-5"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold text-red-900">Error</p>
+          <p class="text-sm leading-5 text-gray-700">{{ message }}</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="flex min-h-screen">
-      <!-- Sidebar -->
-      <aside class="w-full md:w-64 bg-white border-r border-gray-200 p-4">
-        <nav class="space-y-2">
-          <a href="#dashboard" class="block px-4 py-3 rounded-lg bg-red-50 text-red-700 border-l-4 border-red-700 font-semibold hover:bg-red-100 transition">
-            📊 Dashboard
+      <aside
+        id="sidebar"
+        class="w-full overflow-hidden border-r border-gray-200 bg-white p-4 transition-[width,margin,padding] duration-500 md:w-64"
+      >
+        <nav id="sidebarNav" class="space-y-2">
+          <a
+            href="/dashboard"
+            class="block rounded-lg px-4 py-3 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+            >📊 Dashboard</a
+          >
+          <a
+            href="/favourites"
+            class="block rounded-lg px-4 py-3 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+            >📚 My Favourites</a
+          >
+          <a
+            href="/tags"
+            class="block rounded-lg px-4 py-3 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+            >🏷️ Tracked Tags</a
+          >
+          <a
+            href="/admin"
+            class="block rounded-lg border-l-4 border-red-700 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:bg-red-100"
+            >🛡️ Admin Panel</a
+          >
+          <hr class="my-3" />
+          <a
+            href="/user"
+            class="block rounded-lg px-4 py-3 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                class="size-5 fill-slate-950"
+              >
+                <path
+                  d="M10 3.75a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM17.25 4.5a.75.75 0 0 0 0-1.5h-5.5a.75.75 0 0 0 0 1.5h5.5ZM5 3.75a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 .75.75ZM4.25 17a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5ZM17.25 17a.75.75 0 0 0 0-1.5h-5.5a.75.75 0 0 0 0 1.5h5.5ZM9 10a.75.75 0 0 1-.75.75h-5.5a.75.75 0 0 1 0-1.5h5.5A.75.75 0 0 1 9 10ZM17.25 10.75a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5ZM14 10a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM10 16.25a2 2 0 1 0-4 0 2 2 0 0 0 4 0Z"
+                />
+              </svg>
+
+              Settings
+            </div>
           </a>
-          <a href="#users" class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
-            👥 Users
-          </a>
-          <a href="#moderation" class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
-            🛡️ Moderation
-          </a>
-          <a href="#settings" class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
-            ⚙️ Settings
-          </a>
-          <a href="#logs" class="block px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
-            📋 Logs
+          <a
+            href="/logout"
+            class="block rounded-lg px-4 py-3 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                class="size-5 fill-slate-950"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M17 4.25A2.25 2.25 0 0 0 14.75 2h-5.5A2.25 2.25 0 0 0 7 4.25v2a.75.75 0 0 0 1.5 0v-2a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 .75.75v11.5a.75.75 0 0 1-.75.75h-5.5a.75.75 0 0 1-.75-.75v-2a.75.75 0 0 0-1.5 0v2A2.25 2.25 0 0 0 9.25 18h5.5A2.25 2.25 0 0 0 17 15.75V4.25Z"
+                  clip-rule="evenodd"
+                />
+                <path
+                  fill-rule="evenodd"
+                  d="M14 10a.75.75 0 0 0-.75-.75H3.704l1.048-.943a.75.75 0 1 0-1.004-1.114l-2.5 2.25a.75.75 0 0 0 0 1.114l2.5 2.25a.75.75 0 1 0 1.004-1.114l-1.048-.943h9.546A.75.75 0 0 0 14 10Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Logout
+            </div>
           </a>
         </nav>
       </aside>
 
-      <!-- Main Content -->
-      <main class="flex-1 p-4 md:p-8">
-        <!-- Header -->
+      <main class="min-w-0 flex-1 p-4 md:p-8">
         <div class="mb-8">
-          <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p class="text-gray-600">Manage users, moderate content, and configure system settings</p>
+          <h1 class="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
+            Manage Users
+          </h1>
+          <p class="text-gray-600">
+            Edit account details or remove existing users.
+          </p>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="text-gray-600 text-sm mb-1">Total Users</p>
-                <h3 class="text-3xl font-bold text-gray-900">1,248</h3>
-                <p class="text-green-600 text-xs mt-2">+42 this week</p>
-              </div>
-              <span class="text-3xl">👥</span>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="text-gray-600 text-sm mb-1">Active Sessions</p>
-                <h3 class="text-3xl font-bold text-gray-900">287</h3>
-                <p class="text-gray-500 text-xs mt-2">Users online now</p>
-              </div>
-              <span class="text-3xl">🟢</span>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="text-gray-600 text-sm mb-1">Flagged Accounts</p>
-                <h3 class="text-3xl font-bold text-gray-900">8</h3>
-                <p class="text-red-600 text-xs mt-2">Needs review</p>
-              </div>
-              <span class="text-3xl">⚠️</span>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="text-gray-600 text-sm mb-1">System Health</p>
-                <h3 class="text-3xl font-bold text-green-600">99.8%</h3>
-                <p class="text-gray-500 text-xs mt-2">Uptime</p>
-              </div>
-              <span class="text-3xl">✅</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Users Management -->
-        <div id="users" class="bg-white rounded-lg shadow mb-8">
-          <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-gray-900">User Management</h2>
-            <button class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg font-semibold transition">
-              ➕ New User
-            </button>
+        <section
+          class="overflow-hidden rounded-lg bg-white shadow"
+          aria-labelledby="users-heading"
+        >
+          <div class="border-b border-gray-200 px-6 py-4">
+            <h2 id="users-heading" class="text-xl font-bold text-gray-900">
+              Existing Users
+            </h2>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
+            <table class="w-full min-w-[40rem]">
+              <thead class="border-b border-gray-200 bg-gray-50">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Username</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Email</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Joined</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-700"
+                  >
+                    Email
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-700"
+                  >
+                    Admin
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-700"
+                  >
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50 transition">
+                {% for user in users %}
+                <tr class="align-top hover:bg-gray-50">
                   <td class="px-6 py-4">
-                    <div class="font-semibold text-gray-900">john_doe</div>
+                    <form
+                      id="update-{{ user.id }}"
+                      method="post"
+                      action="/admin/update-user"
+                    ></form>
+                    <input
+                      form="update-{{ user.id }}"
+                      type="hidden"
+                      name="user_id"
+                      value="{{ user.id }}"
+                    />
+                    <label class="sr-only" for="email-{{ user.id }}"
+                      >Email</label
+                    >
+                    <input
+                      id="email-{{ user.id }}"
+                      form="update-{{ user.id }}"
+                      name="email"
+                      type="email"
+                      value="{{ user.email }}"
+                      required
+                      class="w-full min-w-64 rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-700"
+                    />
                   </td>
-                  <td class="px-6 py-4 text-gray-600">john@example.com</td>
-                  <td class="px-6 py-4 text-gray-600">Jan 15, 2026</td>
                   <td class="px-6 py-4">
-                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Active</span>
+                    <label
+                      class="flex items-center gap-2 pt-2 text-sm text-gray-700"
+                    >
+                      <input
+                        form="update-{{ user.id }}"
+                        name="admin"
+                        type="checkbox"
+                        {%
+                        if
+                        user.admin
+                        %}checked{%
+                        endif
+                        %}
+                        class="size-4 rounded text-red-700"
+                      />
+                      Admin
+                    </label>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="flex gap-2">
-                      <button class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Edit</button>
-                      <button class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        form="update-{{ user.id }}"
+                        type="submit"
+                        class="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
+                      >
+                        Save
+                      </button>
+                      <form method="post" action="/admin/delete-user">
+                        <input
+                          type="hidden"
+                          name="user_id"
+                          value="{{ user.id }}"
+                        />
+                        <button
+                          type="submit"
+                          class="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+                        >
+                          Delete
+                        </button>
+                      </form>
                     </div>
                   </td>
                 </tr>
-
-                <tr class="hover:bg-gray-50 transition">
-                  <td class="px-6 py-4">
-                    <div class="font-semibold text-gray-900">jane_smith</div>
-                  </td>
-                  <td class="px-6 py-4 text-gray-600">jane@example.com</td>
-                  <td class="px-6 py-4 text-gray-600">Feb 3, 2026</td>
-                  <td class="px-6 py-4">
-                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">Flagged</span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex gap-2">
-                      <button class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Edit</button>
-                      <button class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>
-                    </div>
+                {% else %}
+                <tr>
+                  <td colspan="3" class="px-6 py-10 text-center text-gray-600">
+                    No users found.
                   </td>
                 </tr>
-
-                <tr class="hover:bg-gray-50 transition">
-                  <td class="px-6 py-4">
-                    <div class="font-semibold text-gray-900">alex_wilson</div>
-                  </td>
-                  <td class="px-6 py-4 text-gray-600">alex@example.com</td>
-                  <td class="px-6 py-4 text-gray-600">Mar 22, 2026</td>
-                  <td class="px-6 py-4">
-                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Active</span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex gap-2">
-                      <button class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Edit</button>
-                      <button class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr class="hover:bg-gray-50 transition">
-                  <td class="px-6 py-4">
-                    <div class="font-semibold text-gray-900">spam_user</div>
-                  </td>
-                  <td class="px-6 py-4 text-gray-600">spam@example.com</td>
-                  <td class="px-6 py-4 text-gray-600">Apr 1, 2026</td>
-                  <td class="px-6 py-4">
-                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">Banned</span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex gap-2">
-                      <button class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Unban</button>
-                      <button class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>
-                    </div>
-                  </td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
-        </div>
-
-        <!-- Moderation -->
-        <div id="moderation" class="bg-white rounded-lg shadow mb-8">
-          <div class="border-b border-gray-200 px-6 py-4">
-            <h2 class="text-xl font-bold text-gray-900">Moderation Queue</h2>
-          </div>
-          <div class="p-6 space-y-4">
-            <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <h3 class="font-semibold text-gray-900">Suspicious Activity</h3>
-                  <p class="text-gray-600 text-sm mt-1">User jane_smith has posted 15 stories in 1 hour</p>
-                </div>
-                <span class="bg-yellow-200 text-yellow-900 px-3 py-1 rounded text-xs font-semibold">PENDING</span>
-              </div>
-              <div class="flex gap-2 mt-3">
-                <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-semibold transition">
-                  Approve
-                </button>
-                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-semibold transition">
-                  Ban User
-                </button>
-              </div>
-            </div>
-
-            <div class="border-l-4 border-red-500 bg-red-50 p-4 rounded">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <h3 class="font-semibold text-gray-900">Spam Report</h3>
-                  <p class="text-gray-600 text-sm mt-1">Multiple users reported spam_user for inappropriate content</p>
-                </div>
-                <span class="bg-red-200 text-red-900 px-3 py-1 rounded text-xs font-semibold">CRITICAL</span>
-              </div>
-              <div class="flex gap-2 mt-3">
-                <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-semibold transition">
-                  Dismiss
-                </button>
-                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-semibold transition">
-                  Ban User
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- System Settings -->
-        <div id="settings" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div class="bg-white rounded-lg shadow">
-            <div class="border-b border-gray-200 px-6 py-4">
-              <h2 class="text-xl font-bold text-gray-900">Site Settings</h2>
-            </div>
-            <div class="p-6 space-y-4">
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Site Name</label>
-                <input type="text" value="Ficbook" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-700 focus:border-transparent outline-none transition" />
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Max Storage per User (GB)</label>
-                <input type="number" value="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-700 focus:border-transparent outline-none transition" />
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Maintenance Mode</label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" class="w-5 h-5 text-red-700 rounded" />
-                  <span class="text-gray-700">Enable maintenance mode</span>
-                </label>
-              </div>
-              <button class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg transition">
-                💾 Save Settings
-              </button>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-lg shadow">
-            <div class="border-b border-gray-200 px-6 py-4">
-              <h2 class="text-xl font-bold text-gray-900">Feature Flags</h2>
-            </div>
-            <div class="p-6 space-y-3">
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked class="w-5 h-5 text-red-700 rounded" />
-                <span class="text-gray-700">User Registration</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked class="w-5 h-5 text-red-700 rounded" />
-                <span class="text-gray-700">Story Uploads</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked class="w-5 h-5 text-red-700 rounded" />
-                <span class="text-gray-700">Tag Tracking</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" class="w-5 h-5 text-red-700 rounded" />
-                <span class="text-gray-700">Comments (Beta)</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Activity Logs -->
-        <div id="logs" class="bg-white rounded-lg shadow">
-          <div class="border-b border-gray-200 px-6 py-4">
-            <h2 class="text-xl font-bold text-gray-900">Recent Activity Logs</h2>
-          </div>
-          <div class="divide-y divide-gray-200">
-            <div class="px-6 py-4 hover:bg-gray-50 transition">
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="text-gray-900 font-semibold">User john_doe logged in</p>
-                  <p class="text-gray-600 text-sm mt-1">IP: 192.168.1.1</p>
-                </div>
-                <span class="text-gray-500 text-xs">2 minutes ago</span>
-              </div>
-            </div>
-
-            <div class="px-6 py-4 hover:bg-gray-50 transition">
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="text-gray-900 font-semibold">User jane_smith created new tag tracking</p>
-                  <p class="text-gray-600 text-sm mt-1">Tag: Fantasy Adventure</p>
-                </div>
-                <span class="text-gray-500 text-xs">15 minutes ago</span>
-              </div>
-            </div>
-
-            <div class="px-6 py-4 hover:bg-gray-50 transition">
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="text-gray-900 font-semibold">Admin banned user spam_user</p>
-                  <p class="text-gray-600 text-sm mt-1">Reason: Spam and harassment</p>
-                </div>
-                <span class="text-gray-500 text-xs">1 hour ago</span>
-              </div>
-            </div>
-
-            <div class="px-6 py-4 hover:bg-gray-50 transition">
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="text-gray-900 font-semibold">System backup completed</p>
-                  <p class="text-gray-600 text-sm mt-1">1,248 user accounts backed up</p>
-                </div>
-                <span class="text-gray-500 text-xs">3 hours ago</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        </section>
       </main>
     </div>
+
+    <script>
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      const sidebar = document.getElementById("sidebar");
+      const sidebarNav = document.getElementById("sidebarNav");
+
+      sidebarToggle.addEventListener("click", () => {
+        const isClosed =
+          sidebarToggle.getAttribute("aria-expanded") === "false";
+        sidebar.classList.toggle("w-0", !isClosed);
+        sidebar.classList.toggle("md:w-0", !isClosed);
+        sidebar.classList.toggle("p-0", !isClosed);
+        sidebar.classList.toggle("w-full", isClosed);
+        sidebar.classList.toggle("md:w-64", isClosed);
+        sidebar.classList.toggle("p-4", isClosed);
+        sidebarNav.classList.toggle("hidden", !isClosed);
+        sidebarToggle.setAttribute("aria-expanded", String(isClosed));
+      });
+
+      const toast = document.getElementById("toast");
+      if (toast) {
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "translate-y-2", "brightness-110");
+          setTimeout(() => toast.remove(), 500);
+        }, 3000);
+      }
+    </script>
   </body>
 </html>

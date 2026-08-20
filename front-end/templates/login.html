@@ -45,10 +45,10 @@
         </div>
       </div>
     </div>
-    {% elif message and status in [400, 401, 404] %}
+    {% elif message and status in [400, 401, 404, 403] %}
     <div
       id="toast"
-      class="fixed top-1/4 left-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-red-200 bg-gradient-to-br from-red-50 via-white to-green-50 p-4 shadow-xl shadow-red-100/70 transition-all duration-500"
+      class="fixed top-1/4 left-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-red-200 bg-gradient-to-br from-red-50 via-white to-red-50 p-4 shadow-xl shadow-red-100/70 transition-all duration-500"
     >
       <div class="flex items-start gap-3">
         <div
